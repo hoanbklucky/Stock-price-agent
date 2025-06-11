@@ -3,3 +3,4 @@ For deployment on Agent Engine, run deploy.ipynb, which I created based on this 
 There are other documents about agent deployment:
 - https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/deploy
 - https://cloud.google.com/vertex-ai/generative-ai/docs/agent-engine/quickstart#local-shell_1
+Make sure to include any package (e.g. yfinance) that you use in the requirements variable in deploy.ipynb
