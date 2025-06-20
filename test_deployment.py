@@ -12,72 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Deployment script for Triage Agent"""
-
+"""Test deployment of Academic Research Agent to Agent Engine."""
 
 import os
 
 import vertexai
 from absl import app, flags
-from virtual_nurse.agent import root_agent
 from dotenv import load_dotenv
 from vertexai import agent_engines
-from vertexai.preview.reasoning_engines import AdkApp
 
 FLAGS = flags.FLAGS
+
 flags.DEFINE_string("project_id", "virtual-nurse-450613", "GCP project ID.")
 flags.DEFINE_string("location", "us-central1", "GCP location.")
 flags.DEFINE_string("bucket", "deploy-virtual-nurse", "GCP bucket.")
-flags.DEFINE_string("resource_id", None, "ReasoningEngine resource ID.")
-
-flags.DEFINE_bool("list", False, "List all agents.")
-flags.DEFINE_bool("create", True, "Creates a new agent.")
-flags.DEFINE_bool("delete", False, "Deletes an existing agent.")
-flags.mark_bool_flags_as_mutual_exclusive(["create", "delete"])
-
-
-def create() -> None:
-    """Creates an agent engine for Triage Agent."""
-    adk_app = AdkApp(agent=root_agent, enable_tracing=True)
-
-    remote_agent = agent_engines.create(
-        adk_app,
-        display_name=root_agent.name,
-        requirements=[
-        "google-adk",
-        "google-cloud-aiplatform[agent_engines]",
-        "google-genai",
-        "pydantic",
-        "cloudpickle",  
-        ],
-        extra_packages=[
-            "virtual_nurse",  
-        ]
-    )
-    print(f"Created remote agent: {remote_agent.resource_name}")
+flags.DEFINE_string(
+    "resource_id",
+    "6497964186574782464",
+    "ReasoningEngine resource ID (returned after deploying the agent)",
+)
+flags.DEFINE_string("user_id", "hoan_123", "User ID (can be any string).")
+flags.mark_flag_as_required("resource_id")
+flags.mark_flag_as_required("user_id")
 
 
-def delete(resource_id: str) -> None:
-    remote_agent = agent_engines.get(resource_id)
-    remote_agent.delete(force=True)
-    print(f"Deleted remote agent: {resource_id}")
+def main(argv: list[str]) -> None:  # pylint: disable=unused-argument
 
-
-def list_agents() -> None:
-    remote_agents = agent_engines.list()
-    template = """
-{agent.name} ("{agent.display_name}")
-- Create time: {agent.create_time}
-- Update time: {agent.update_time}
-"""
-    remote_agents_string = "\n".join(
-        template.format(agent=agent) for agent in remote_agents
-    )
-    print(f"All remote agents:\n{remote_agents_string}")
-
-
-def main(argv: list[str]) -> None:
-    del argv  # unused
     load_dotenv()
 
     project_id = (
@@ -116,17 +76,29 @@ def main(argv: list[str]) -> None:
         staging_bucket=f"gs://{bucket}",
     )
 
-    if FLAGS.list:
-        list_agents()
-    elif FLAGS.create:
-        create()
-    elif FLAGS.delete:
-        if not FLAGS.resource_id:
-            print("resource_id is required for delete")
-            return
-        delete(FLAGS.resource_id)
-    else:
-        print("Unknown command")
+    agent = agent_engines.get(FLAGS.resource_id)
+    print(f"Found agent with resource ID: {FLAGS.resource_id}")
+    session = agent.create_session(user_id=FLAGS.user_id)
+    print(f"Created session for user ID: {FLAGS.user_id}")
+    print("Type 'quit' to exit.")
+    while True:
+        user_input = input("Input: ")
+        if user_input == "quit":
+            break
+
+        for event in agent.stream_query(
+            user_id=FLAGS.user_id, session_id=session["id"], message=user_input
+        ):
+            if "content" in event:
+                if "parts" in event["content"]:
+                    parts = event["content"]["parts"]
+                    for part in parts:
+                        if "text" in part:
+                            text_part = part["text"]
+                            print(f"Response: {text_part}")
+
+    agent.delete_session(user_id=FLAGS.user_id, session_id=session["id"])
+    print(f"Deleted session for user ID: {FLAGS.user_id}")
 
 
 if __name__ == "__main__":
