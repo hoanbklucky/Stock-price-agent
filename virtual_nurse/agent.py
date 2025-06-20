@@ -1,7 +1,6 @@
 from google.adk.agents import Agent
 
-
-from prompt import VIRTUAL_ASSISTANT_PROMPT
+from . import prompt
 
 # Load the trained model
 from google import genai
@@ -156,7 +155,7 @@ root_agent = Agent(
     model='gemini-2.5-pro',
     name='triage_agent',
     description='An agent that predicts triage disposition for tonsillectomy patients.',
-    instruction=VIRTUAL_ASSISTANT_PROMPT,
+    instruction=prompt.VIRTUAL_ASSISTANT_PROMPT,
     tools=[predict_triage]
 )
 
