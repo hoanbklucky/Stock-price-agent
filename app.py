@@ -1,11 +1,10 @@
 import streamlit as st
 import csv
 import io
-import vertexai
 import json
 import os
 
-from vertexai import agent_engines
+from google.cloud.aiplatform import agent_engines
 
 agent = agent_engines.get("8914989811589185536")
 
