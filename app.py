@@ -4,7 +4,7 @@ import streamlit as st
 from vertexai import agent_engines
 
 if "agent" not in st.session_state:
-    st.session_state["agent"] = agent_engines.get("projects/533873564462/locations/us-central1/reasoningEngines/8665884457200254976")
+    st.session_state["agent"] = agent_engines.get("projects/533873564462/locations/us-central1/reasoningEngines/6714699918641987584")
 
 if "remote_session" not in st.session_state:
     st.session_state["remote_session"] = st.session_state["agent"].create_session(user_id="hoan_456")
