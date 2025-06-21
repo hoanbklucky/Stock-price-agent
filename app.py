@@ -1,30 +1,35 @@
 import streamlit as st
-import csv
-import io
-import json
-import os
 
-from google.cloud.aiplatform import agent_engines
+#from google.cloud.aiplatform import agent_engines
+from vertexai import agent_engines
 
-agent = agent_engines.get("8914989811589185536")
+if "agent" not in st.session_state:
+    st.session_state["agent"] = agent_engines.get("projects/533873564462/locations/us-central1/reasoningEngines/8665884457200254976")
 
-remote_session = agent.create_session(user_id="u_456")
+if "remote_session" not in st.session_state:
+    st.session_state["remote_session"] = st.session_state["agent"].create_session(user_id="hoan_456")
 
 def generate(prompt):
-    for event in agent.stream_query(
-        user_id="u_456",
-        session_id=remote_session["id"],
+    for event in st.session_state["agent"].stream_query(
+        user_id="hoan_456",
+        session_id=st.session_state["remote_session"]["id"],
         message=prompt,
     ):
-        if "text" in event["content"]["parts"][0]:
-            yield event["content"]["parts"][0]["text"]
+        yield event
+        """ if "content" in event:
+            if "parts" in event["content"]:
+                parts = event["content"]["parts"]
+                for part in parts:
+                    #if "text" in part:
+                    #    text_part = part["text"]
+                    yield part """
 
-st.title(" 🤖 Virtual Nurse")
+st.title(" 🤖 CareGuideAI")
 st.header("I am a virtual nurse", divider="gray")
 st.write("""To be able to assist you, I will ask you some questions related to the patient and then let you know triage decision. I can also provide you general guidance on post tonsillectomy care. Are you ready?""")
 
 if "model" not in st.session_state:
-    st.session_state["model"] = "gemini-2.5-flash-001"
+    st.session_state["model"] = "gemini-2.5-pro"
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
