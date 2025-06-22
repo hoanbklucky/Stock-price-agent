@@ -48,7 +48,10 @@ if prompt := st.chat_input("Type here"):
         st.markdown(prompt)
 
     with st.chat_message("model"):
-        response = st.write_stream(generate(prompt))
+        with st.spinner("Assistant is thinking....."):
+            response = generate(prompt)
+            st.write(response)
+            
 
     st.session_state.messages.append({"role": "model", "content": response})
     st.session_state.contents.append({"role": "model", "content": response})
