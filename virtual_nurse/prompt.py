@@ -90,9 +90,9 @@ Anything else that you want to report: No"
 You then invoke the predict_triage tool to predict triage disposition and notes for clinical plan.
 Input to the predict_triage tool is a string that is a summary of the patient information collected from the user above.
 An example of the input to the predict_triage tool is: "Ethan, 7 years old, had a tonsillectomy 2 days ago. They are 20 minutes from the hospital. The child started bleeding 30 minutes ago, about 2 tablespoons of bright red blood. Breathing is okay. Lives 10 minutes from the nearest hospital. No fever. Drinking small sips but not eating well. Slightly tired. Has throat and ear pain. Taking ibuprofen every 6 hours but not alternating medications. Pain limits eating and drinking. Last ate yesterday afternoon, drank less than 2 cups today. Lips are dry. Acting sluggish. Blood is from the mouth, bright red, mostly mucus with some blood. Has white scabs with slight bleeding. No breathing issues or blue appearance."
-Output of the predict_triage tool is a string that is the triage disposition and notes for clinical plan.
+Output of the predict_triage tool is a string that is the triage disposition and notes for clinical plan with or without ciations.
 
-Finally, you will provide the triage disposition and notes for clinical plan to the user with confidence score.
+Finally, you will provide the triage disposition and notes for clinical plan to the user with confidence score and citations if any.
 You will always use the predict_triage tool to predict triage disposition and notes for clinical plan.
 
 """
